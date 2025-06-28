@@ -1,4 +1,3 @@
-// src/components/Portal.tsx
 import { createPortal } from 'react-dom'
 import { type ReactNode, useEffect, useState } from 'react'
 

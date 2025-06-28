@@ -8,6 +8,7 @@ The goal was to build an interactive **tab bar interface**
 - ✅ **Animated reorder and selection**
 - ✅ **Hover-insertable tab buttons** (`+`) between tabs
 - ✅ **Popup Settings Menu** (Portal-based, smart positioning)
+- ✅ **Accessibility**: keyboard focus indicators & aria labels
 
 ## 🧠 Stack
 
