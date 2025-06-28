@@ -8,7 +8,6 @@ The goal was to build an interactive **tab bar interface**
 - ✅ **Animated reorder and selection**
 - ✅ **Hover-insertable tab buttons** (`+`) between tabs
 - ✅ **Popup Settings Menu** (Portal-based, smart positioning)
-- ✅ **Framer Motion animations** for smooth transitions
 
 ## 🧠 Stack
 
@@ -17,7 +16,6 @@ The goal was to build an interactive **tab bar interface**
 - [Vite](https://vitejs.dev/)
 - [Tailwind CSS](https://tailwindcss.com/)
 - [@dnd-kit](https://dndkit.com/) – drag-and-drop library
-- [Framer Motion](https://www.framer.com/motion/) – animations
 
 ## 📦 Installation
 

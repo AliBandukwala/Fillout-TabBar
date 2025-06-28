@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
   HiOutlineDocumentText,
   HiOutlineInformationCircle,
@@ -106,7 +105,7 @@ export default function Tab({
   }
 
   return (
-    <motion.div layout className="relative inline-flex items-center">
+    <div className="transition-all duration-300 relative inline-flex items-center">
       {/* Main clickable + draggable tab */}
       <div
         {...dragAttributes}
@@ -132,30 +131,24 @@ export default function Tab({
 
           {showMenu && (
             <Portal>
-              <AnimatePresence>
-                {showMenu && (
-                  <motion.div
-                    ref={menuRef}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.15 }}
-                    style={{
-                      position: 'absolute',
-                      top: menuPosition.top,
-                      left: menuPosition.left,
-                      zIndex: 9999,
-                    }}
-                    className="shadow-lg"
-                  >
-                    <SettingsMenu />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {showMenu && (
+                <div
+                  ref={menuRef}
+                  style={{
+                    position: 'absolute',
+                    top: menuPosition.top,
+                    left: menuPosition.left,
+                    zIndex: 9999,
+                  }}
+                  className="shadow-lg transition-all duration-150 transform scale-100 opacity-100 animate-fade-in"
+                >
+                  <SettingsMenu />
+                </div>
+              )}
             </Portal>
           )}
         </>
       )}
-    </motion.div>
+    </div>
   )
 }
