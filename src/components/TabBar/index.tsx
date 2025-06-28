@@ -59,7 +59,7 @@ export default function TabBar() {
   }, [tabs])
 
   return (
-    <div className="flex flex-row justify-center" role="tablist">
+    <div className="flex flex-row justify-center" role="tablist" aria-label="Page Tabs">
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={tabs.map(t => t.id)} strategy={horizontalListSortingStrategy}>
           {tabs.map((tab, index) => (

@@ -32,24 +32,21 @@ export default function Tab({
   const startPos = useRef<{ x: number; y: number } | null>(null)
   const wasDragged = useRef(false)
 
-  // Choose icon based on tab label semantics
+  // Select icon based on label content
   const Icon = label.toLowerCase().includes('info')
     ? HiOutlineInformationCircle
     : label.toLowerCase().includes('end')
     ? HiOutlineCheckCircle
     : HiOutlineDocumentText
 
-  // Tailwind style configuration
-  const baseStyles =
-    'inline-flex items-center text-sm rounded-lg border font-medium focus:outline-none transition-all duration-200 relative'
-
+  // Tailwind dynamic styles for each state
   const dynamicStyles = active
     ? 'bg-white text-black border-gray-200 shadow-sm pr-10 pl-4 py-1.5'
-    : 'bg-gray-100 text-gray-500 border-transparent hover:bg-gray-200 px-4 py-1.5'
+    : 'bg-gray-100 text-gray-500 border-transparent hover:bg-gray-200 px-4 py-1.5 group focus-visible:bg-white focus-visible:text-black focus-visible:border-gray-200'
 
-  const iconColor = active ? 'text-[#F59D0E]' : 'text-gray-400'
+  const iconColor = active ? 'text-[#F59D0E]' : 'group-focus-visible:text-[#F59D0E] text-gray-400'
 
-  // Detect outside clicks to auto-close menu
+  // Close menu on outside click
   useEffect(() => {
     if (!showMenu) return
     const handleClickOutside = (e: MouseEvent) => {
@@ -61,7 +58,7 @@ export default function Tab({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [showMenu])
 
-  // Handle tab drag + click logic
+  // Drag logic
   const handlePointerDown = (e: React.PointerEvent) => {
     startPos.current = { x: e.clientX, y: e.clientY }
     wasDragged.current = false
@@ -75,81 +72,111 @@ export default function Tab({
     if (dx > 3 || dy > 3) wasDragged.current = true
   }
 
-  const handlePointerUp = () => {
-    if (!wasDragged.current) {
+  const isInsideMenuTrigger = (target: EventTarget | null): boolean => {
+    return (target as HTMLElement)?.closest('.tab-menu-trigger') !== null
+  }
+
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!wasDragged.current && !isInsideMenuTrigger(e.target)) {
       onClick()
       setShowMenu(false)
     }
     startPos.current = null
   }
 
-  // Handle menu button click with dynamic position logic
+  // method to select the currently focused
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if ((e.key === 'Enter' || e.key === ' ') && !isInsideMenuTrigger(e.target)) {
+      e.preventDefault()
+      onClick()
+      setShowMenu(false)
+    }
+  }
+
+  // Show menu near button
   const handleOptionsClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
     e.preventDefault()
 
     const rect = e.currentTarget.getBoundingClientRect()
-    const menuWidth = 200
-    const viewportWidth = window.innerWidth
-    const shouldFlip = rect.left + menuWidth > viewportWidth
+    const menuHeight = 200 // Adjust based on actual menu height
 
-    setMenuPosition({
-      top: rect.bottom + 4,
-      left: shouldFlip ? rect.right - menuWidth : rect.left,
-    })
+    const spaceAbove = rect.top
+
+    // Decide placement based on available space
+    const showAbove = spaceAbove > menuHeight
+
+    if (showAbove) {
+      setMenuPosition({
+        top: rect.top - menuHeight - 4, // 4px spacing
+        left: rect.left,
+      })
+    } else {
+      setMenuPosition({
+        top: rect.bottom + 4, // Default below
+        left: rect.left,
+      })
+    }
 
     setShowMenu(true)
   }, [])
 
-  return (
-    <div
-      className="transition-all duration-300 relative inline-flex items-center"
-      role="tab"
-      aria-selected={active}
-      tabIndex={active ? 0 : -1}
-    >
-      {/* Main tab body with drag + click events */}
-      <div
-        {...dragAttributes}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        className={`${baseStyles} ${dynamicStyles} cursor-grab`}
-      >
-        <Icon className={`w-6 h-6 mr-2 ${iconColor}`} />
-        {label}
-      </div>
 
-      {/* Options menu button and popup */}
-      {active && (
-        <>
+  return (
+    <>
+      <div className="relative inline-flex items-center" tabIndex={-1}>
+        {/* Main tab button */}
+        <div
+          {...dragAttributes}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onKeyDown={handleKeyDown}
+          tabIndex={0}
+          role="tab"
+          aria-selected={active}
+          className={`group inline-flex items-center text-sm rounded-lg border font-medium focus:outline-none transition-all duration-200 cursor-grab ${dynamicStyles} focus-visible:ring-2 focus-visible:ring-blue-200 focus-visible:ring-offset-1 focus-visible:ring-offset-blue-400`}
+        >
+          <Icon className={`w-6 h-6 mr-2 ${iconColor}`} />
+          {label}
+        </div>
+
+        {/* 3-dot menu trigger — positioned absolutely */}
+        {active && (
           <button
+            tabIndex={-1}
             type="button"
-            className="tab-menu-trigger absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-100"
-            onClick={handleOptionsClick}
+            className="tab-menu-trigger absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-100 focus-visible:hidden"
+            onClick={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+              handleOptionsClick(e)
+            }}
             aria-label="Open tab menu"
           >
             <HiOutlineDotsVertical className="w-4 h-4 text-gray-500" />
           </button>
+        )}
+      </div>
 
-          {showMenu && (
-            <Portal>
-              <div
-                ref={menuRef}
-                style={{
-                  position: 'absolute',
-                  top: menuPosition.top,
-                  left: menuPosition.left,
-                  zIndex: 9999,
-                }}
-                className="shadow-lg transition-all duration-150 transform scale-100 opacity-100 animate-fade-in"
-              >
-                <SettingsMenu />
-              </div>
-            </Portal>
-          )}
-        </>
+      {/* Settings menu */}
+      {showMenu && (
+        <Portal>
+          <div
+            ref={menuRef}
+            style={{
+              position: 'absolute',
+              top: menuPosition.top,
+              left: menuPosition.left,
+              zIndex: 9999,
+            }}
+            className="shadow-lg transition-all duration-150 transform scale-100 opacity-100 animate-fade-in"
+          >
+            <SettingsMenu />
+          </div>
+        </Portal>
       )}
-    </div>
+    </>
   )
 }

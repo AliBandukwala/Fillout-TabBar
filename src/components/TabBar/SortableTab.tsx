@@ -1,6 +1,5 @@
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from '@dnd-kit/utilities'
-
 import Tab from "../Tab"
 
 function SortableTab({
@@ -28,7 +27,7 @@ function SortableTab({
   }
 
   return (
-    <div ref={setNodeRef} style={style} role="tab" aria-selected={active} tabIndex={active ? 0 : -1}>
+    <div ref={setNodeRef} style={style}>
       <Tab
         label={label}
         active={active}
